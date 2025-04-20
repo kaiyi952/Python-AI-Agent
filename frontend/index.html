@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智能食谱助手</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      #recipe-result {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        display: none;
+      }
+      #recipe-image {
+        max-width: 100%;
+        height: auto;
+        margin-top: 20px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>智能食谱助手</h1>
+      <div class="form-group">
+        <label for="ingredients">现有食材（用逗号分隔）：</label>
+        <input
+          type="text"
+          id="ingredients"
+          placeholder="例如：鸡蛋, 西红柿, 青椒"
+        />
+      </div>
+      <div class="form-group">
+        <label for="cuisine">想要制作的菜系：</label>
+        <input
+          type="text"
+          id="cuisine"
+          placeholder="例如：中餐、西餐、日式料理"
+        />
+      </div>
+      <button onclick="generateRecipe()">生成食谱</button>
+
+      <div id="recipe-result">
+        <h2>生成的食谱</h2>
+        <div id="recipe-content"></div>
+        <img id="recipe-image" src="" alt="食谱图片" />
+      </div>
+    </div>
+
+    <script>
+      async function generateRecipe() {
+        const ingredients = document
+          .getElementById("ingredients")
+          .value.split(",")
+          .map((item) => item.trim());
+        const cuisine = document.getElementById("cuisine").value;
+
+        try {
+          const response = await fetch(
+            "http://localhost:8001/generate-recipe",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ingredients: ingredients,
+                cuisine_type: cuisine,
+              }),
+            }
+          );
+
+          const data = await response.json();
+
+          document.getElementById("recipe-content").innerHTML =
+            data.recipe.replace(/\n/g, "<br>");
+          document.getElementById("recipe-image").src = data.image_url;
+          document.getElementById("recipe-result").style.display = "block";
+        } catch (error) {
+          alert("生成食谱时出错，请稍后重试");
+          console.error("Error:", error);
+        }
+      }
+    </script>
+  </body>
+</html>
