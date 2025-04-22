@@ -1,57 +1,67 @@
 # 智能食谱助手
 
-这是一个基于 AI 的智能食谱生成助手，可以根据用户现有的食材和偏好的菜系类型，自动生成详细的食谱和配图。
+根据用户提供的食材和偏好，智能生成个性化食谱的应用程序。
+
+## 项目结构
+
+- `/smartChef`: 核心 Python 代码
+  - `simple_chef.py`: 食谱生成脚本
+  - `recipes/`: 保存生成的食谱
+- `/frontend-react`: React 前端应用
+- `/backend-flask`: Flask 后端 API 服务
+- `/frontend`: 原始 HTML/JS 前端(已被 React 前端替代)
 
 ## 功能特点
 
-- 根据现有食材生成创意食谱
-- 支持多种菜系类型（中餐、西餐、日式料理等）
-- 自动生成食谱配图
-- 提供详细的烹饪步骤和技巧
+- 基于用户现有食材生成创意食谱
+- 支持多种菜系选择
+- 可以添加特殊要求（如低卡、素食等）
+- 生成美观的图片展示
+- 保存历史食谱记录
 
-## 安装说明
+## 快速开始
 
-1. 克隆项目到本地：
+### 后端设置
 
-```bash
-git clone [项目地址]
-cd smartChef
-```
-
-2. 安装后端依赖：
+1. 安装依赖:
 
 ```bash
+cd backend-flask
 pip install -r requirements.txt
 ```
 
-3. 配置环境变量：
-   创建 `.env` 文件并添加以下内容：
-
-```
-OPENAI_API_KEY=你的OpenAI API密钥
-```
-
-## 运行说明
-
-1. 启动后端服务：
+2. 启动 Flask 服务器:
 
 ```bash
-cd backend
-python main.py
+python app.py
 ```
 
-2. 打开前端页面：
-   直接在浏览器中打开 `frontend/index.html` 文件
+服务器将在 http://localhost:5000 运行。
 
-## 使用说明
+### 前端设置
 
-1. 在输入框中输入你现有的食材（用逗号分隔）
-2. 选择或输入想要制作的菜系类型
-3. 点击"生成食谱"按钮
-4. 等待系统生成食谱和配图
+1. 安装依赖:
+
+```bash
+cd frontend-react
+npm install
+```
+
+2. 启动开发服务器:
+
+```bash
+npm start
+```
+
+应用将在 http://localhost:3000 运行。
+
+## 技术栈
+
+- 前端: React, Bootstrap, React-Markdown
+- 后端: Flask, Python
+- AI: OpenAI API
 
 ## 注意事项
 
-- 需要有效的 OpenAI API 密钥
-- 确保网络连接正常
-- 建议使用现代浏览器访问
+- 确保在`.env`文件中设置了正确的 API 密钥
+- 确保 backend-flask 目录中的 app.py 能够正确找到 smartChef/simple_chef.py

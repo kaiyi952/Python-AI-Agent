@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智能食谱助手</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      textarea,
+      select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+      #recipe-result {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        white-space: pre-wrap;
+        display: none;
+      }
+      #loading {
+        text-align: center;
+        display: none;
+        margin-top: 20px;
+      }
+      #recipe-img {
+        max-width: 100%;
+        height: auto;
+        margin-top: 15px;
+        border-radius: 4px;
+      }
+      .error {
+        color: red;
+        margin-top: 20px;
+        text-align: center;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>智能食谱助手</h1>
+      <div class="form-group">
+        <label for="ingredients">现有食材（用逗号分隔）：</label>
+        <textarea
+          id="ingredients"
+          rows="3"
+          placeholder="例如：鸡蛋，番茄，青椒"
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label for="cuisine">想要的菜系：</label>
+        <select id="cuisine">
+          <option value="中餐">中餐</option>
+          <option value="西餐">西餐</option>
+          <option value="日式">日式料理</option>
+          <option value="韩式">韩式料理</option>
+          <option value="东南亚">东南亚菜</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="requirements">特殊要求（可选）：</label>
+        <input
+          type="text"
+          id="requirements"
+          placeholder="例如：低卡、无糖、素食"
+        />
+      </div>
+      <button id="generate-btn" onclick="generateRecipe()">生成食谱</button>
+
+      <div id="loading">
+        <p>AI正在为您精心制作食谱，请稍候...</p>
+        <div
+          class="spinner"
+          style="
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 10px auto;
+          "
+        ></div>
+        <style>
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        </style>
+      </div>
+
+      <div id="error-message" class="error"></div>
+
+      <div id="recipe-result"></div>
+    </div>
+
+    <script>
+      async function generateRecipe() {
+        // 获取用户输入
+        const ingredients = document.getElementById("ingredients").value;
+        const cuisine = document.getElementById("cuisine").value;
+        const requirements = document.getElementById("requirements").value;
+
+        // 验证输入
+        if (!ingredients) {
+          alert("请输入食材！");
+          return;
+        }
+
+        // 显示加载状态
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("error-message").style.display = "none";
+        document.getElementById("recipe-result").style.display = "none";
+        document.getElementById("generate-btn").disabled = true;
+
+        try {
+          // 调用API
+          const response = await fetch("/api/generate-recipe", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              ingredients: ingredients,
+              cuisine_type: cuisine,
+              special_requirements: requirements,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("生成食谱时出错，请稍后重试");
+          }
+
+          const data = await response.json();
+
+          // 显示生成的食谱
+          document.getElementById("recipe-result").innerHTML =
+            formatRecipe(data);
+          document.getElementById("recipe-result").style.display = "block";
+        } catch (error) {
+          console.error("Error:", error);
+          document.getElementById("error-message").textContent = error.message;
+          document.getElementById("error-message").style.display = "block";
+        } finally {
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("generate-btn").disabled = false;
+        }
+      }
+
+      function formatRecipe(recipe) {
+        // 将食谱转换为HTML格式
+        let html = `<h2>${recipe.name}</h2>`;
+
+        html += "<h3>食材：</h3><ul>";
+        recipe.ingredients.forEach((ingredient) => {
+          html += `<li>${ingredient}</li>`;
+        });
+        html += "</ul>";
+
+        html += "<h3>烹饪步骤：</h3><ol>";
+        recipe.steps.forEach((step) => {
+          html += `<li>${step}</li>`;
+        });
+        html += "</ol>";
+
+        html += "<h3>烹饪技巧：</h3><ul>";
+        recipe.tips.forEach((tip) => {
+          html += `<li>${tip}</li>`;
+        });
+        html += "</ul>";
+
+        html += `<p><strong>准备时间：</strong>${recipe.prepTime} 分钟</p>`;
+        html += `<p><strong>烹饪时间：</strong>${recipe.cookTime} 分钟</p>`;
+
+        // 添加图片
+        html += `<img id="recipe-img" src="${recipe.imageUrl}" alt="${recipe.name}">`;
+
+        // 添加保存信息
+        html += `<p><small>食谱已保存至: ${recipe.savedFile}</small></p>`;
+
+        return html;
+      }
+    </script>
+  </body>
+</html>
