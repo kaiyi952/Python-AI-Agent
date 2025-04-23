@@ -245,7 +245,9 @@ def generate_image(dish_name):
     """使用Unsplash生成食物图片URL (因为OpenAI图像生成是付费的)"""
     
     # 简单起见，使用Unsplash随机图片API
-    dish_name_escaped = dish_name.replace(" ", "+")
+    # 清理搜索关键词，移除特殊字符
+    clean_dish_name = dish_name.replace("*", "").replace("\"", "").replace("?", "").replace(":", "").replace("<", "").replace(">", "").replace("|", "")
+    dish_name_escaped = clean_dish_name.replace(" ", "+")
     image_url = f"https://source.unsplash.com/random/800x600/?food,{dish_name_escaped}"
     
     return image_url
@@ -270,7 +272,8 @@ def save_recipe(recipe_content, recipe_name=None):
     
     # 创建文件名
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    safe_name = recipe_name.replace(" ", "_").replace("/", "_").replace("\\", "_")
+    # 清理文件名中的特殊字符
+    safe_name = recipe_name.replace("*", "").replace("\"", "").replace("?", "").replace(":", "").replace("<", "").replace(">", "").replace("|", "").replace("/", "_").replace("\\", "_").replace(" ", "_")
     filename = f"recipes/{safe_name}_{timestamp}.md"
     
     # 添加元数据
@@ -289,11 +292,19 @@ tags: [AI生成]
     recipe_with_image = recipe_content + f"\n\n![{recipe_name}]({image_url})\n"
     
     # 保存到文件
-    with open(filename, "w", encoding="utf-8-sig") as f:
-        f.write(metadata + recipe_with_image)
-    
-    print(f"✅ 食谱已保存至: {filename}")
-    return filename
+    try:
+        with open(filename, "w", encoding="utf-8-sig") as f:
+            f.write(metadata + recipe_with_image)
+        print(f"✅ 食谱已保存至: {filename}")
+        return filename
+    except Exception as e:
+        print(f"❌ 保存食谱失败: {str(e)}")
+        # 如果文件名有问题，使用默认名称
+        safe_filename = f"recipes/recipe_{timestamp}.md"
+        with open(safe_filename, "w", encoding="utf-8-sig") as f:
+            f.write(metadata + recipe_with_image)
+        print(f"✅ 使用备用文件名保存: {safe_filename}")
+        return safe_filename
 
 def main():
     """主函数"""

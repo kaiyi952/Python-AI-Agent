@@ -25,6 +25,9 @@ def index():
 def generate_recipe_image(recipe_name, recipe_description):
     """使用OpenAI DALL-E 3生成食谱图片"""
     try:
+        # 清理菜名中的特殊字符，用于文件名
+        clean_name = recipe_name.replace("*", "").replace("\"", "").replace("?", "").replace(":", "").replace("<", "").replace(">", "").replace("|", "").replace("/", "_").replace("\\", "_")
+        
         # 构建提示词，包含菜名和菜品描述
         prompt = f"一盘美味可口的{recipe_name}，高清专业美食摄影，顶视角，光线明亮，摆盘精美，背景简洁。{recipe_description}"
         
@@ -50,7 +53,7 @@ def generate_recipe_image(recipe_name, recipe_description):
             os.makedirs("images", exist_ok=True)
             # 生成文件名
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            filename = f"images/{recipe_name.replace(' ', '_')}_{timestamp}.png"
+            filename = f"images/{clean_name}_{timestamp}.png"
             # 保存图片
             with open(filename, 'wb') as handler:
                 handler.write(img_data)
