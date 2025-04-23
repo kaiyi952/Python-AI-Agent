@@ -38,6 +38,15 @@
         border: 1px solid #ddd;
         border-radius: 4px;
       }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .checkbox-group label {
+        margin: 0 0 0 10px;
+        font-weight: normal;
+      }
       button {
         background-color: #4caf50;
         color: white;
@@ -79,6 +88,21 @@
         text-align: center;
         display: none;
       }
+      .ai-image-badge {
+        display: inline-block;
+        background-color: #4caf50;
+        color: white;
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin-left: 10px;
+      }
+      .image-loading {
+        text-align: center;
+        font-style: italic;
+        color: #666;
+        margin-top: 15px;
+      }
     </style>
   </head>
   <body>
@@ -109,6 +133,12 @@
           id="requirements"
           placeholder="例如：低卡、无糖、素食"
         />
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="generate-ai-image" checked />
+        <label for="generate-ai-image"
+          >使用AI生成真实食谱图片（可能需要更长时间）</label
+        >
       </div>
       <button id="generate-btn" onclick="generateRecipe()">生成食谱</button>
 
@@ -149,6 +179,8 @@
         const ingredients = document.getElementById("ingredients").value;
         const cuisine = document.getElementById("cuisine").value;
         const requirements = document.getElementById("requirements").value;
+        const generateAiImage =
+          document.getElementById("generate-ai-image").checked;
 
         // 验证输入
         if (!ingredients) {
@@ -173,6 +205,7 @@
               ingredients: ingredients,
               cuisine_type: cuisine,
               special_requirements: requirements,
+              generate_ai_image: generateAiImage,
             }),
           });
 
@@ -221,8 +254,15 @@
         html += `<p><strong>准备时间：</strong>${recipe.prepTime} 分钟</p>`;
         html += `<p><strong>烹饪时间：</strong>${recipe.cookTime} 分钟</p>`;
 
+        // 添加图片标题
+        html += `<h3>成品图${
+          recipe.aiImageGenerated
+            ? '<span class="ai-image-badge">AI生成</span>'
+            : ""
+        }</h3>`;
+
         // 添加图片
-        html += `<img id="recipe-img" src="${recipe.imageUrl}" alt="${recipe.name}">`;
+        html += `<img id="recipe-img" src="${recipe.imageUrl}" alt="${recipe.name}" loading="lazy">`;
 
         // 添加保存信息
         html += `<p><small>食谱已保存至: ${recipe.savedFile}</small></p>`;
